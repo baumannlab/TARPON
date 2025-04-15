@@ -1,0 +1,301 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "$id": "https://raw.githubusercontent.com/ndeimler99/TArPON/master/nextflow_schema.json",
+    "title": "ndeimler99/TArPON pipeline parameters",
+    "description": "A pipeline to Analyze Telomeric sequences from Nanopore Sequencing",
+    "type": "object",
+    "definitions": {
+        "Input_Output": {
+            "title": "Input and Output Parameters",
+            "type": "object",
+            "fa_icon": "fas fa-arrow-right",
+            "description": "Mandatory Parameters to set up the Analysis",
+            "required": ["input", "outdir", "run_name"],
+            "properties": {
+                "input": {
+                    "type": "string",
+                    "format": "path",
+                    "exists": true,
+                    "title": "Input",
+                    "description": "Sequencing Files - Either a file directory or a single file - BAM, fastq, or fastq.gz accepted"
+                },
+                "fast_basecalled": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "Fast Basecalled Data",
+                    "description": "Check this box and provide a pod5 directory if the data is basecalled using a fast model"
+                },
+                "pod5_dir": {
+                    "type": "string",
+                    "format": "path",
+                    "exists": true,
+                    "title": "Pod5 Directory",
+                    "description": "A directory where the raw pod5 files are stored - this is required when specifying if the data was fast basecalled or if the user is interested in modifications"
+                },
+                "run_name":{
+                    "type": "string",
+                    "title": "Run Name",
+                    "description": "Title of Sequencing Run for Generation of Output Files",
+                    "default": "Run"
+                },
+                "sample_name":{
+                    "type": "string",
+                    "title": "Sample Name",
+                    "description": "Name of sample when sequencing contains only one sample",
+                    "default": "sample"
+                },
+                "sample_file":{
+                    "type": "string",
+                    "format": "file-path",
+                    "pattern": "\\S+csv$",
+                    "title": "Sample File",
+                    "description": "CSV file containing sample names and barcodes to use for demultiplexing. If no capture probe sequence is provided the barcodes will also be used for determing the end of the telomere",
+                    "fa_icon": "fas fa-file-csv"
+                },
+                "capture_probe_sequence": {
+                    "type":"string",
+                    "title":"Telomere Capture Sequence",
+                    "description": "Provide the first 12 nucleotides of the capture sequence that would appear on the G strand telomeric sequences"
+                },
+                "outdir": {
+                    "type": "string",
+                    "format": "path",
+                    "title": "Output Directory",
+                    "default": "output",
+                    "description": "This should be a path to a directory to store the output data. The parent directory should exist. If the main directory does not exist it will be created"
+                },
+                "overwrite_outdir": {
+                    "type": "boolean",
+                    "default":false,
+                    "title": "Overwrite Output Directory?",
+                    "description": "Set this to true if the output directory already exists but you would like to overwrite the data"
+                }
+            }
+        },
+        "Basic_Options": {
+            "title": "Basic Pipeline Options",
+            "type": "object",
+            "fa_icon": "fas fa-arrow-right",
+            "description": "Basic Pipeline Options",
+            "required": ["repeat", "minimum_telo_reads_per_sample"],
+            "properties": {
+                "repeat": {
+                    "type": "string",
+                    "title": "Telomeric Repeat Sequence (G-Strand)",
+                    "default": "GGTTAG",
+                    "description": "Please supply the telomeric sequence found on the G strand, for examples and most vertebrata, GGTTAG"
+                },
+                "minimum_telo_reads_per_sample": {
+                    "type": "number",
+                    "title": "Minimum Number of Telomeres Per Sample",
+                    "default":500,
+                    "description": "Samples will be marked as failed if minimum number of telomeres is below this threshold"
+                },
+                "c_strand_only": {
+                    "type": "boolean",
+                    "default": false,
+                    "title": "C Strand Analysis Only",
+                    "description": "If the data was collected in such a way that only C strand telomeric sequences should be expected (i.e. ONT protocol), select this box"
+                },
+                "repeat_count": {
+                    "type": "number",
+                    "title": "Repeat Number for Putative Identification",
+                    "description": "Number of repeats a read must contain to be considered putatively telomeric",
+                    "default": 10
+                },
+                "reverse_complement_threshold": {
+                    "type": "number",
+                    "title": "Reverse Complement Threshold",
+                    "default": 0.80,
+                    "minimum":0,
+                    "exclusiveMaximum": 1,
+                    "description": "Percentage of telomeric repeats must be greater than this value to be classified as C strand. If the percentage is less than 1 minus this value, the read is classified as C strand. Anthing greater than 1-value but less than value is removed from analysis"
+                }
+            }
+        },
+        "Capture_Probe_Demux_Filter": {
+            "title": "Capture Probe Identification, Demultiplexing, and Subtelomeric Filtering Parameters",
+            "type": "object",
+            "fa_icon": "fas fa-arrow-right",
+            "description": "Advanced Parameters relating to the identification of capture probe sequences, demultiplexing samples, and filtering telomeric reads by their subtelomere",
+            "properties" : {
+                "capture_probe_sequence_errors":{
+                    "type":"number",
+                    "default":2,
+                    "title": "Allowed Errors in Capture Probe Sequence",
+                    "description": "Number of allowed errors to be found in the capture probe sequence. The capture probe sequence wil only be found after ten telomeric repeats. It is recomended this value be 2 for a 12 nucleotide capture probe sequence. For each additional 8bp, the number of errors should be increased by 1"
+                },
+                "barcode_errors":{
+                    "type":"number",
+                    "default":3,
+                    "title":"Allowed Errors in Barcode Sequences",
+                    "description": "Number of allowed errors in the barcode sequence. It is recomended this value by 1/8 the length of the barcode assuming the hamming distance between barcodes is greater than 1/8 the barcode length"
+                },
+                "capture_probe_overhang_length":{
+                    "type":"number",
+                    "default": 18,
+                    "title": "Capture Probe Overhang Length",
+                    "description": "Number of telomeric nucleotides in duplex overhang. If the teloemre originates from the C strand these repeats will be removed from the end of the telomere as they would have originated from the capture probe, not the biological telomere"
+                },
+                "min_subtelo_length": {
+                    "type":"number",
+                    "title":"Minimum Subtelomere Length",
+                    "default":300,
+                    "description": "Minimum Read Lenth Before VRR region Telomeric Start Site to Ensure sequencing completely through telomeres"
+                },
+                "subtelo_threshold": {
+                  "type":"number",
+                  "default":0.3,
+                  "minimum":0,
+                  "exclusiveMaximum": 1,
+                  "title":"Maximum Telomeric Percentage",
+                  "description":"Maximum percentage of one nucleotide substitutions of telomeric sequences found within min_subtelo_length before read does not pass filtering criteria"
+                }
+            }
+        },
+        "Telo_Start":{
+            "title": "Determining Telomere Start Position",
+            "type": "object",
+            "fa_icon": "fas fa-arrow-right",
+            "description": "Advanced Options regarding Telomere Start Position Analysis and Filtering",
+            "properties": {
+                "sliding_window_size":{
+                    "type":"number",
+                    "default":100,
+                    "title": "Sliding Window Size",
+                    "description": "Length of the sliding window analyzed for the identification of telomeric start"
+                },
+                "sliding_window_interval":{
+                    "type":"number",
+                    "default":15,
+                    "title":"Sliding Window Interval",
+                    "description": "How many base pairs will the sliding window jump each time rather than operating on a nucleotide by nucleotide slide"
+                },
+                "upper_threshold":{
+                    "type":"number",
+                    "default":0.6,
+                    "minimum":0,
+                    "exclusiveMaximum": 1,
+                    "title": "Upper Telomeric Threshold",
+                    "description": "The percentage of which a sliding window must consist of one nucleotide repeat variations for the telomere to start. Must be a value between 0 and 1"
+                },
+                "lower_threshold":{
+                    "type":"number",
+                    "default":0.05,
+                    "minimum":0,
+                    "exclusiveMaximum": 1,
+                    "title": "Lower Telomeric Threshold",
+                    "description": "Sliding window one nucleotide variation percentage must not drop below this value after upper threshold has been surpassed."
+                },
+                "consecutive_threshold":{
+                    "type":"number",
+                    "default":15,
+                    "minimum":0,
+                    "title":"Consecutive Sliding Windows",
+                    "description":"Number of consecutive sliding windows below the lower threshold for telomere start site to be unidentified"
+                },
+                "telomeric_repeat_percentage":{
+                    "type":"number",
+                    "default":0.7,
+                    "minimum":0,
+                    "exclusiveMaximum": 1,
+                    "title": "Mimumum Telomere Percentage",
+                    "description": "Additional filtering step that removes telomeres that consist of less than this percentage one nucleotide variant repeats from the VRR start to the capture probe sequence"
+                },
+                "pretelomeric_repeat_percentage":{
+                    "type":"number",
+                    "default":0.1,
+                    "minimum":0,
+                    "exclusiveMaximum": 1,
+                    "title": "Pre-telomeric Repeat Percentage",
+                    "description": "Maximum Percentage of telomere+1N repeats in pretelo_start nucleotides prior to VRR-start site"
+                },
+                "pretelo_start": {
+                    "type":"number",
+                    "default":2000,
+                    "title": "Pretelomeric Start Distance",
+                    "description": "Distance before VRR-region start site to search for telomere+1N repeats relating to Pre-Telomeric Repeat Percentage"
+                },
+                "minimum_telomere_length": {
+                    "type":"number",
+                    "default":0,
+                    "minimum": 0,
+                    "title": "Minimum Telomere Length",
+                    "description": "Minimum length of a telomere to be included in the analysis"
+                }
+            }
+        },
+        "Advanced_Options": {
+            "title": "Advanced Options",
+            "type": "object",
+            "fa_icon": "fas fa-arrow-right",
+            "description": "Advanced Options regarding Mutant and Other Analyses",
+            "properties": {
+                "remove_wd":{
+                    "title":"Remove Work Directory",
+                    "type":"boolean",
+                    "default":false,
+                    "description": "If true, working directory is removed on run complete. This prevents build up of unnecesary files but prevents -resume from being used"
+                },
+                "detailed_stats":{
+                    "title": "Detailed Plots",
+                    "type":"boolean",
+                    "default":false,
+                    "description": "Additional sets of plots analysing telomeric reads are created. See README for more details"
+                },
+                "strand_comparison":{
+                    "title": "Strand Comparison",
+                    "type":"boolean",
+                    "default":false,
+                    "description": "Generate Plots Directly comparing C to G strand results"
+                },
+                "indiv_read_plots":{
+                    "title":"Individual Real Plots",
+                    "type":"boolean",
+                    "default":false,
+                    "description": "Generate Plots showing individual reads and telomeric start identification"
+                },
+                "restriction_digest_analysis": {
+                    "type":"string",
+                    "title":"Restrction Enzymes",
+                    "description":"Provide a list of comma seperated restriction enzyme sites for an analysis of digestion completion",
+                    "default": ""
+                },
+                "mutant": {
+                    "type":"string",
+                    "title":"Mutant Repeat of Interest",
+                    "description":"Telomeric Mutation of Interest - See Manual for more details",
+                    "default": "false"
+                }
+            } 
+        }
+    },
+    "allOf": [
+        {
+            "$ref": "#/definitions/Input_Output"
+        },
+        {
+            "$ref": "#/definitions/Basic_Options"
+        },
+        {
+            "$ref": "#/definitions/Capture_Probe_Demux_Filter"
+        },
+        {
+            "$ref": "#/definitions/Telo_Start"
+        },
+        {
+            "$ref": "#/definitions/Advanced_Options"
+        }
+    ],
+    "resources": {
+        "recommended": {
+            "cpus": 2,
+            "memory": "10GB"
+        },
+        "minimum": {
+            "cpus": 2,
+            "memory": "4GB"
+        },
+        "run_time": "Depends on Sequencing Size"
+    }
+}
