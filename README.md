@@ -29,9 +29,9 @@ After demultiplexing telomeric reads are filtered to ensure the telomere was com
 
 ## [Installation](#installation)
 
-TARPON is a nextflow pipeline and is readily integrable into Epi2Me but can also be installed on the command line. Nextflow must also be installed which requires a java and docker installation.  Please see https://www.nextflow.io/docs/latest/install.html for more information on installing nextflow and java. For more information on NextFlow please see https://www.nextflow.io/docs/latest/index.html. 
+TARPON is a nextflow pipeline and is readily integrable into Epi2Me but can also be installed on the command line. Nextflow must also be installed which requires a java and docker or singularity installation.  Please see https://www.nextflow.io/docs/latest/install.html for more information on installing nextflow and java. For more information on NextFlow please see https://www.nextflow.io/docs/latest/index.html.
 
-To install TARPON on the command line simply clone this github repository and ensure Docker is installed on your system. Nextflow will automatically pull the appropriate docker images from dockerhub the first time the program is executed to ensure no dependency issues arise.
+To install TARPON on the command line simply clone this github repository and ensure Docker or Singularity are installed on your system. Nextflow will automatically pull the appropriate docker images from dockerhub the first time the program is executed to ensure no dependency issues arise.
 
     git clone git@github.com:ndeimler99/TARPON.git
     chmod +x TARPON/bin/*
@@ -45,6 +45,7 @@ To install TARPON on the command line simply clone this github repository and en
 <br>
 
     nextflow run main.nf --input ./test_data/simplex_test.duplex.bam --capture_probe_sequence ATGCTACGATCA --outdir ./simplex_test
+
 
 ## [Running TARPON through Epi2Me](#epi2me)
 
@@ -81,6 +82,12 @@ To activate a boolean parameter such as strand comparison no value needs to be p
 To include a restriction digest analysis use the paramter --restriction_digest_analysis with a comma separated list of cut sites. For example searching for EcoRV and EcoRI cut sites.
 
     nextflow run main.nf --input ./test_data/simplex_test.duplex.bam --capture_probe_sequence ATGCTACGATCA --outdir ./simplex_test --restriction_digest_analysis GATATC,GAATTC
+
+### Using Singularity
+
+To use singularity for managing containers instead of Docker, you can add the `-profile singularity` flag to your command:
+
+    nextflow run main.nf -profile singularity --input ./test_data/simplex_test.duplex.bam --capture_probe_sequence ATGCTACGATCA --outdir ./simplex_test
 
 ## [Additional Help and Information](#help)
 
