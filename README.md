@@ -1,7 +1,9 @@
 # TARPON v1.0.0
 Telomere Analysis and Research Pipeline Optimized for Nanopore Sequencing Data
 
-TARPON is no longer supported at this location. Please see https://github.com/ndeimler99/TARPON for the most updated version of TARPON
+TARPON is presented here as the version described in DOI:
+A version with additional features and parallelization can be found at https://github.com/ndeimler99/TARPON.
+
 ## Table of Contents
 1. [What is TARPON and Why Should I Use It?](#what_and_why)
 2. [The Pipeline](#pipeline)
