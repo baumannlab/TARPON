@@ -15,7 +15,7 @@ A version with additional features and parallelization can be found at https://g
 8. [Advanced Input Parameteres](#advanced_input)
 9. [Output Files](#output)
 
-If you use this software please cite...
+If you use this software please cite "Deimler N, Ho DV, Paul N, Gill Z, Baumann P (2026) TARPON—A Telomere Analysis and Research Pipeline Optimized for Nanopore. PLoS Comput Biol 22(2): e1013915. https://doi.org/10.1371/journal.pcbi.1013915"
 
 ## [What is TARPON and Why Should I Use It?](#what_and_why)
 
